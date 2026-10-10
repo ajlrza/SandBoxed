@@ -1,0 +1,27 @@
+/* SPDX-License-Identifier: MIT */
+body {
+  background: #fff;
+  color: #000;
+  font-family: sans-serif;
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 0 16px;
+  line-height: 1.5;
+}
+.ok { color: green; }
+.bad { color: red; }
+.wait { color: gray; }
+button { font-size: 16px; padding: 8px 24px; margin-right: 8px; }
+textarea { width: 100%; box-sizing: border-box; font: inherit; }
+#script { font-family: monospace; font-size: 13px; margin: 0; }
+canvas { border: 1px solid #000; width: 100%; box-sizing: border-box; touch-action: none; }
+/* The sandbox is as wide as the window, not only as the text. */
+#sandbox { width: calc(100vw - 32px); height: 360px; margin-left: calc(50% - 50vw + 16px); cursor: grab; }
+#preview { width: 300px; max-width: 100%; }
+select, input { font: inherit; max-width: 100%; }
+input[type=text] { width: 20em; }
+input[type=number] { width: 5em; }
+#pad { width: 240px; max-width: 100%; cursor: crosshair; }
+.tools button { font-size: 14px; padding: 4px 12px; }
+.tools input[type=color] { vertical-align: middle; margin-right: 8px; }
+.tools .swatch { width: 24px; height: 24px; padding: 0; margin: 0 4px 0 0; border: 1px solid #000; vertical-align: middle; }

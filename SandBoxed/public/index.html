@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<!-- SPDX-License-Identifier: MIT -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SandBoxed</title>
+<link rel="stylesheet" href="style.css">
+<script type="module" src="js/main.js"></script>
+</head>
+<body>
+
+<!-- ---------- Start: the AI, then host or join ---------- -->
+<section id="startScreen">
+<h1>SandBoxed</h1>
+
+<p>SandBoxed is a small shared 2D world. You can host a new sandbox or join one.</p>
+<p>In the sandbox you make your own objects. You write what you want, for example
+"a red ball that jumps". The AI on your own computer turns your words into a small script.</p>
+<p>Your object is sent to the other players. Their computers check it automatically.
+If it follows the rules and is safe, it is accepted and comes to life in the sandbox.
+If not, it is rejected.</p>
+<p>The game runs between the players. If the host leaves, the next best player takes over.</p>
+<p>You need an AI to play: the AI built into Chrome, a model in your browser,
+or your own AI server like Ollama or LM Studio.</p>
+
+<h2>AI</h2>
+<p>
+  AI:
+  <select id="aiChoice">
+    <option value="chrome">Chrome AI (built-in)</option>
+    <option value="browser">Browser model (download)</option>
+    <option value="server">AI server (Ollama, LM Studio)</option>
+  </select>
+</p>
+<p id="browserBox" hidden>
+  Model:
+  <select id="browserModel">
+    <option value="small">Small – Qwen 2.5 1.5B (~1 GB)</option>
+    <option value="medium">Medium – Llama 3.2 3B (~2 GB)</option>
+    <option value="large">Large – Qwen 2.5 7B (~5 GB)</option>
+  </select>
+</p>
+<div id="serverBox" hidden>
+  <p>
+    Address: <input id="serverUrl" type="text" size="28" spellcheck="false">
+    Model: <select id="serverModel"></select>
+  </p>
+  <p class="wait">
+    The server must allow this page: <code id="origin"></code><br>
+    Ollama: set OLLAMA_ORIGINS to this address before you start it. Address http://localhost:11434/v1<br>
+    LM Studio: start the server with CORS on, for example <code>lms server start --cors</code>. Address http://localhost:1234/v1<br>
+    Chrome may ask you to allow this page to reach devices on your network.
+  </p>
+</div>
+<p>Status: <span id="api" class="wait">checking...</span></p>
+<p>Model: <span id="model" class="wait">checking...</span></p>
+<p>Test: <span id="test" class="wait">waiting...</span></p>
+<p id="downloadBox" hidden>
+  <button id="download">Download the model</button><br>
+  <span id="downloadNote"></span>
+</p>
+<p id="removeBox" hidden>
+  <button id="remove">Delete the model from this browser</button>
+</p>
+
+<p>
+  <button id="host" disabled>Host</button>
+  <button id="join" disabled>Join</button>
+</p>
+</section>
+
+<!-- ---------- Host: the settings of a new sandbox ---------- -->
+<section id="hostScreen" hidden>
+<h1>Host a sandbox</h1>
+<form id="hostForm">
+  <p><label>Your name<br><input id="playerName" type="text" maxlength="20" required></label></p>
+  <p><label>Name of the sandbox<br><input id="sandboxName" type="text" maxlength="30" required></label></p>
+  <p><label>Players, with you<br><input id="maxPlayers" type="number" min="2" max="8" value="4" required></label></p>
+  <p>
+    Who can join<br>
+    <label><input type="radio" name="visibility" value="public" checked> anyone, the sandbox is in the list</label><br>
+    <label><input type="radio" name="visibility" value="private"> only players with the link</label>
+  </p>
+  <p>
+    Rules<br>
+    <label><input type="checkbox" id="hostGravity" checked> gravity</label><br>
+    <label>Objects can destroy
+      <select id="hostDestruction">
+        <option value="all">all objects</option>
+        <option value="own">only objects of the same player</option>
+        <option value="none">nothing</option>
+      </select>
+    </label>
+  </p>
+  <p>
+    <button type="submit">Create the sandbox</button>
+    <button type="button" id="hostBack">Back</button>
+  </p>
+</form>
+</section>
+
+<!-- ---------- The sandbox ---------- -->
+<section id="sandboxScreen" hidden>
+<h1 id="sandboxTitle"></h1>
+<p id="sandboxInfo" class="wait"></p>
+<canvas id="sandbox"></canvas>
+<p class="wait">Drag the empty space or use the mouse wheel to look around. Drag objects to move them.
+Click an object to select it.</p>
+<p class="tools" id="selectedBox" hidden>
+  Selected: <span id="selectedName"></span>
+  <button id="copySelected">Copy to workbench</button>
+  <button id="deleteSelected">Delete</button>
+</p>
+<p class="tools" id="rulesBox">
+  Rules:
+  <label><input type="checkbox" id="gravity"> gravity</label>
+  <label>objects can destroy
+    <select id="destruction">
+      <option value="all">all objects</option>
+      <option value="own">only objects of the same player</option>
+      <option value="none">nothing</option>
+    </select>
+  </label>
+  <button id="clearSandbox">Clear the sandbox</button>
+</p>
+
+<h2>Workbench</h2>
+<p>Describe an object. Your AI makes it here on the workbench, with its script.
+Change the script and the object changes right away. When you like it, put it into the sandbox.</p>
+<textarea id="prompt" rows="2">a small house with a red roof</textarea>
+<p>
+  Look:
+  <select id="lookMode">
+    <option value="icon">the AI picks an icon</option>
+    <option value="sketch">the AI sketches it</option>
+    <option value="shapes">the AI builds it from shapes</option>
+    <option value="drawing">I draw it myself</option>
+  </select>
+</p>
+<div id="padBox" hidden>
+  <p>Draw the look here. The text above is then only for the name and the behavior.
+  Mirror draws everything again on the other side. The eraser removes whole strokes.</p>
+  <p class="tools">
+    <select id="penTool">
+      <option value="line">pen</option>
+      <option value="straight">straight line</option>
+      <option value="rect">rectangle</option>
+      <option value="ellipse">ellipse</option>
+      <option value="eraser">eraser</option>
+    </select>
+    <select id="penWidth">
+      <option value="1">thin</option>
+      <option value="3" selected>normal</option>
+      <option value="6">thick</option>
+      <option value="12">very thick</option>
+    </select>
+    <label><input type="checkbox" id="penFill"> filled</label>
+    <label><input type="checkbox" id="penMirror"> mirror</label>
+  </p>
+  <p class="tools" id="swatches"><input type="color" id="penColor" value="#000000"></p>
+  <canvas id="pad" width="240" height="240"></canvas>
+  <p class="tools">
+    <button id="padUndo">Undo</button>
+    <button id="padRedo">Redo</button>
+    <button id="padClear">Clear drawing</button>
+  </p>
+  <p class="tools">
+    <button id="padLoad">Load from workbench</button>
+    <button id="padApply">Put on workbench</button>
+    <span id="padText" class="wait"></span>
+  </p>
+</div>
+<p>
+  <button id="create" disabled>Create</button>
+  <button id="clear">Clear</button>
+  <span id="createText" class="wait"></span>
+</p>
+<canvas id="preview" width="600" height="450"></canvas>
+<textarea id="script" rows="10" spellcheck="false"></textarea>
+<p><button id="put" disabled>Put into sandbox</button> <span id="scriptText" class="wait"></span></p>
+
+<p><button id="leave">Leave</button></p>
+</section>
+
+<p class="wait">Icons: Twemoji by Twitter and contributors, CC-BY 4.0.
+Browser models: WebLLM, Qwen 2.5 (Apache 2.0), Llama 3.2 (Built with Llama).
+Sketches: Sketch-RNN by Google Magenta, trained on Quick, Draw!</p>
+
+</body>
+</html>
