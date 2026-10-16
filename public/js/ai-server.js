@@ -63,8 +63,9 @@ export async function status(settings) {
     }
   }
 
+  const msg = await response.json();
 
-  if (!response.ok) return { state: "missing", text: "the server answered " + response.message };
+  if (!response.ok) return { state: "missing", text: "the server answered " + msg};
   const data = await response.json().catch(function () { return {}; });
   if (!Array.isArray(data.data)) {
 
