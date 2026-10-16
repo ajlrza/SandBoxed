@@ -58,7 +58,7 @@ export async function status(settings) {
     } catch (error) {
         return {
           state: "missing",
-          text: "can not reach" + endpoint + ". Is it the right key/endpoint?"
+          text: "can not reach" + endpoint + ". Error: " + error.message
         }
     }
   }
