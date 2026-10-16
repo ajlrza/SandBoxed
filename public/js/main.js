@@ -2,7 +2,7 @@
 // The page: checking the AI, hosting a sandbox, and making objects with the AI in it.
 
 import { show } from "./ui.js";
-import { currentAI, testAI, getSettings, changeSettings } from "./ai.js";
+import { currentAI, testAI, getSettings, changeSettings, resetSettings } from "./ai.js";
 import { lookAIs, sketchAI, behaviorAI, askedFor, generate } from "./prompts.js";
 import { sketch } from "./sketch.js";
 import { validate } from "./validate.js";
@@ -11,6 +11,7 @@ import { clearObjects, removeObject, onSelect, selected, setWorld } from "./sand
 import { setDraft, setScript } from "./workbench.js";
 import { showPad, getStrokes } from "./pad.js";
 import { room, savedName, hostRoom, leaveRoom } from "./room.js";
+
 
 const apiText = document.getElementById("api");
 const modelText = document.getElementById("model");
@@ -26,27 +27,49 @@ const lookMode = document.getElementById("lookMode");
 const createButton = document.getElementById("create");
 const createText = document.getElementById("createText");
 const aiChoice = document.getElementById("aiChoice");
-const serverBox = document.getElementById("serverBox");
+const serverBox = document.getElementById("configBox");
 const serverUrl = document.getElementById("serverUrl");
 const serverModel = document.getElementById("serverModel");
+const serverChoiceBox = document.getElementById("serverChoice")
 const browserBox = document.getElementById("browserBox");
 const browserModel = document.getElementById("browserModel");
+const cloudForm = document.getElementById('cloudConfigForm');
+const localForm = document.getElementById('localConfigForm');
 const gravityBox = document.getElementById("gravity");
 const destructionBox = document.getElementById("destruction");
 
 // ---------- Choose the AI ----------
-
 aiChoice.value = getSettings().ai;
 browserModel.value = getSettings().size;
-serverUrl.value = getSettings().url;
 showBoxes();
 document.getElementById("origin").textContent = location.origin;
 
 // The settings of the chosen AI are shown under it.
+
 function showBoxes() {
   browserBox.hidden = aiChoice.value !== "browser";
   serverBox.hidden = aiChoice.value !== "server";
+  localForm.hidden = serverChoiceBox.value !== 'local';
+  cloudForm.hidden = serverChoiceBox.value !== 'cloud';
 }
+
+cloudForm.addEventListener('submit', function(event) {
+
+  event.preventDefault();
+
+  const cloudConfig = new FormData(cloudForm);
+  const data = Object.fromEntries(cloudConfig);
+
+  changeSettings( { 
+    ai: aiChoice.value, 
+    url: serverUrl.value, 
+    model: data.cloudModel,
+    key: data.apiKey
+  })
+
+  console.log(getSettings())
+  check();
+})
 
 // The old AI or model frees its memory, for example a browser model in the graphics card.
 function release() {
@@ -66,13 +89,22 @@ browserModel.onchange = function () {
   check();
 };
 serverUrl.onchange = function () {
+  release();
   changeSettings({ url: serverUrl.value });
   check();
 };
-serverModel.onchange = function () {
-  changeSettings({ model: serverModel.value });
-  test(checks);
-};
+
+serverChoiceBox.onchange = function () {
+  console.log(serverChoiceBox.value)
+  if (getSettings().servertype === serverChoiceBox.value && getSettings().url != "") {
+    serverUrl.value = getSettings().url
+  }
+  else if (getSettings().servertype !== serverChoiceBox.value) {
+    serverUrl.value = ""
+  }
+  showBoxes();
+  changeSettings({ servertype: serverChoiceBox.value });
+}
 
 // The models of the server. The remembered model stays chosen if the server still has it.
 function showModels(models) {
@@ -129,6 +161,7 @@ async function check() {
 
   show(modelText, "ready", "ok");
   removeBox.hidden = !status.removable;
+
   await test(number);
 }
 

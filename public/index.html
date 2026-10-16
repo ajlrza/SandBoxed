@@ -31,7 +31,11 @@ or your own AI server like Ollama or LM Studio.</p>
   <select id="aiChoice">
     <option value="chrome">Chrome AI (built-in)</option>
     <option value="browser">Browser model (download)</option>
-    <option value="server">AI server (Ollama, LM Studio)</option>
+    <option value="server">AI server (local/cloud)</option>
+  </select>
+  <select id="serverChoice">
+    <option value="local">OLLama, Etc</option>
+    <option value="cloud">Cloud</option>
   </select>
 </p>
 <p id="browserBox" hidden>
@@ -42,18 +46,39 @@ or your own AI server like Ollama or LM Studio.</p>
     <option value="large">Large – Qwen 2.5 7B (~5 GB)</option>
   </select>
 </p>
-<div id="serverBox" hidden>
-  <p>
-    Address: <input id="serverUrl" type="text" size="28" spellcheck="false">
-    Model: <select id="serverModel"></select>
-  </p>
-  <p class="wait">
-    The server must allow this page: <code id="origin"></code><br>
-    Ollama: set OLLAMA_ORIGINS to this address before you start it. Address http://localhost:11434/v1<br>
-    LM Studio: start the server with CORS on, for example <code>lms server start --cors</code>. Address http://localhost:1234/v1<br>
-    Chrome may ask you to allow this page to reach devices on your network.
-  </p>
-</div>
+Address: <input type="text" id="serverUrl" name="serverUrl" size="26" spellcheck="false"></input>
+<pd id="configBox" hidden>
+  <form id = "localConfigForm" method="GET" hidden>
+    <p id="localModelField">
+      <label for="localModel">Model:</label>
+      <input type="text" id="localModel" name="localModel" placeholder="Enter model name"></input>
+    </p>
+      <p class="wait">
+        The server must allow this page: <code id="origin"></code><br>
+        Ollama: set OLLAMA_ORIGINS to this address before you start it. Address http://localhost:11434/v1<br>
+        LM Studio: start the server with CORS on, for example <code>lms server start --cors</code>. Address http://localhost:1234/v1<br>
+        Chrome may ask you to allow this page to reach devices on your network.
+      </p>
+  </form>
+  <form id="cloudConfigForm" method="GET" hidden>
+
+    <p id="apiKeyField">
+      <label for="keyInput">API Key:</label>
+      <input type="text" id="apiKey" name="apiKey" size="26" spellcheck="false">
+    </p>
+
+    <p id="cloudModelField">
+      <label for="cloudModel">Model:</label>
+      <input type="text" id="cloudModel" name="cloudModel" placeholder="Enter model name">
+    </p>
+
+    <p>
+      <button type="submit">Submit Configuration</button>
+    </p>
+
+  </form>
+</pd>
+
 <p>Status: <span id="api" class="wait">checking...</span></p>
 <p>Model: <span id="model" class="wait">checking...</span></p>
 <p>Test: <span id="test" class="wait">waiting...</span></p>

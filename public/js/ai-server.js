@@ -15,18 +15,64 @@ function base(settings) {
 // The server is there when it lists its models.
 export async function status(settings) {
   let response;
-  try {
-    response = await fetch(base(settings) + "/models", { signal: AbortSignal.timeout(5000) });
-  } catch (error) {
-    return {
-      state: "missing",
-      text: "can not reach " + base(settings) + ". Is the server running, and does it allow this page?"
-    };
+  let endpoint;
+
+  if (settings.servertype === "local") {
+    endpoint = base(settings) + "/models";
+    try {
+      response = await fetch(endpoint, { signal: AbortSignal.timeout(5000) });
+    } catch (error) {
+        return {
+        state: "missing",
+        text: "can not reach " + endpoint + ". Is the server running, and does it allow this page?"
+      };
+    }
   }
+
+  if (settings.servertype === "cloud") {
+
+    const endpoint = "https://benchmarkserver.onrender.com/api/chat";
+
+    const data = {
+      model: settings.model, 
+      messages: [
+        {
+          role: "user",
+          content: ""
+        }
+      ],
+    };
+
+    const payload = {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${settings.key}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(data),
+      
+      signal: AbortSignal.timeout(5000) 
+    }
+    try {
+      response = await fetch(endpoint, payload);
+    } catch (error) {
+        return {
+          state: "missing",
+          text: "can not reach" + endpoint + ". Is it the right key/endpoint?"
+        }
+    }
+  }
+
+
   if (!response.ok) return { state: "missing", text: "the server answered " + response.status };
   const data = await response.json().catch(function () { return {}; });
   if (!Array.isArray(data.data)) {
-    return { state: "missing", text: "no list of models at " + base(settings) + "/models. Is the address right?" };
+
+    if (settings.servertype === 'cloud') {
+      return { state: "missing", text: "no list of api config at " + endpoint};
+    }
+
+    return { state: "missing", text: "no list of models at " + endpoint + "/models. Is the address right?" };
   }
   // Embedding models can not chat, so they are left out.
   const models = data.data.map(function (model) { return String(model.id); })
@@ -36,22 +82,59 @@ export async function status(settings) {
 }
 
 export async function ask(messages, schema, settings) {
-  const response = await fetch(base(settings) + "/chat/completions", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model: settings.model,
-      messages: messages,
-      // The server must answer with JSON in the form of the schema.
-      response_format: { type: "json_schema", json_schema: { name: "answer", schema: schema } },
-      stream: false
-    })
-  });
+  
+  let endpoint;
+  let response;
+  let req;
+
+  if (settings.ai === "local") {
+    endpoint = base(settings) + "/chat/completions";
+
+    req = {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: settings.model,
+        messages: messages,
+        // The server must answer with JSON in the form of the schema.
+        response_format: { type: "json_schema", json_schema: { name: "answer", schema: schema } },
+        stream: false
+      })
+    }
+  }
+  
+  else if (settings.ai === "cloud") {
+    endpoint = "https://benchmarkserver.onrender.com/api/chat";
+
+    req = {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${settings.key}`},
+      body: JSON.stringify({
+        "model": settings.model,
+        "messages": messages,
+        "response_format": {
+          "type": "json_schema",
+          "json_schema": {
+            "name": "answer",
+            "strict": true, 
+            "schema": schema
+          }
+        },
+        "stream": false
+      })
+    }
+  }
+
+
+  response = await fetch(endpoint, req);
+
   if (!response.ok) {
     throw new Error("the AI server answered " + response.status + ": " + (await response.text()).slice(0, 200));
   }
+
   const message = (await response.json()).choices[0].message;
   // Thinking models can put the whole answer into the thinking part and leave content empty:
   // LM Studio calls it reasoning_content, Ollama calls it reasoning.
   return JSON.parse(message.content || message.reasoning_content || message.reasoning || "");
 }
+

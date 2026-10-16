@@ -16,12 +16,14 @@ import * as chrome from "./ai-chrome.js";
 import * as webllm from "./ai-webllm.js";
 import * as server from "./ai-server.js";
 
-const providers = { chrome: chrome, browser: webllm, server: server };
+const providers = { chrome: chrome, browser: webllm, server: server};
 const settingsKey = "sandboxed.ai";
 
 // The choice of the player, remembered in this browser.
 // size is the browser model (small, medium or large), url and model are for the AI server.
-let settings = { ai: "chrome", size: "small", url: server.defaultUrl, model: "" };
+// servertype is only for ai: server
+// key is only for servertype: cloud
+let settings = { ai: "chrome", size: "small", url: server.defaultUrl, model: "", servertype: "", key: ""};
 try {
   Object.assign(settings, JSON.parse(localStorage.getItem(settingsKey)));
 } catch (error) {
@@ -35,6 +37,29 @@ if (["small", "medium", "large"].includes(settings.ai)) {
 
 export function getSettings() {
   return settings;
+}
+
+export function resetSettings(settings) {
+  switch (settings.ai) {
+    case "chrome":
+      Object.assign(settings, { ai: "chrome", size: "small", url: server.defaultUrl, model: "" });
+      break; 
+      
+    case "webllm":
+      Object.assign(settings, { ai: "browser", size: "small", url: server.defaultUrl, model: webllm.name});
+      break;
+
+    case "server":
+      if (settings.servertype === 'cloud') {
+        Object.assign(settings, { ai: "server", size: "", url: "", model: "" })
+      }
+      else if (settings.servertype === 'local') {
+        Object.assign(settings, { ai: "server", size: "", url: server.defaultUrl, model: "" })
+      }
+      break;
+  }
+  localStorage.setItem(settingsKey, JSON.stringify(settings))
+  return settings
 }
 
 export function changeSettings(changes) {
@@ -62,3 +87,5 @@ export async function testAI() {
   );
   return String(answer.answer).trim();
 }
+
+
