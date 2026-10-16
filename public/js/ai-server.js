@@ -51,7 +51,7 @@ export async function status(settings) {
       },
       body: JSON.stringify(data),
       
-      signal: AbortSignal.timeout(5000) 
+      signal: AbortSignal.timeout(30000) 
     }
     try {
       response = await fetch(endpoint, payload);
