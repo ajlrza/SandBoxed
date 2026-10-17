@@ -31,7 +31,7 @@ export async function status(settings) {
 
   if (settings.servertype === "cloud") {
 
-    endpoint = "https://benchmarkserver.onrender.com/api/chat";
+    endpoint = ;
 
     const data = {
       model: settings.model, 
@@ -85,7 +85,7 @@ export async function ask(messages, schema, settings) {
   let response;
   let req;
 
-  if (settings.ai === "local") {
+  if (settings.servertype === "local") {
 
     req = {
       method: "POST",
@@ -111,7 +111,7 @@ export async function ask(messages, schema, settings) {
 
   }
   
-  else if (settings.ai === "cloud") {
+  else if (settings.servertype === "cloud") {
 
     req = {
       method: "POST",
@@ -124,7 +124,7 @@ export async function ask(messages, schema, settings) {
       })
     }
 
-    response = await fetch("https://benchmarkserver.onrender.com/api/chat", req);
+    response = await fetch("", req);
 
     if (!response.ok) {
       throw new Error("the AI server answered " + response.status + ": " + (await response.text()).slice(0, 200));
