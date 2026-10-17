@@ -30,9 +30,9 @@ const providers = {
   },
   
   browser: {
-    name: browser.name,
-    ask: (messages, schema, settings) => browser.ask(messages, schema, settings),
-    status: () => browser.status()
+    name: webllm.name,
+    ask: (messages, schema, settings) => webllm.ask(messages, schema, settings),
+    status: () => webllm.status()
   }
 }
 const settingsKey = "sandboxed.ai";
