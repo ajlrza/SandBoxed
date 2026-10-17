@@ -16,7 +16,25 @@ import * as chrome from "./ai-chrome.js";
 import * as webllm from "./ai-webllm.js";
 import * as server from "./ai-server.js";
 
-const providers = { chrome: chrome, browser: webllm, server: server};
+const providers = {
+  chrome: {
+    name: chrome.name,
+    status: () => chcrome.status(),
+    ask: (messages, schema, settings) => chrome.ask(messages, schema, settings),
+  },
+
+  server: {
+    name: server.name,
+    ask: (messages, schema, settings) => server.ask(messages, schema, settings),
+    status: () => server.status()
+  },
+  
+  browser: {
+    name: browser.name,
+    ask: (messages, schema, settings) => browser.ask(messages, schema, settings),
+    status: () => browser.status()
+  }
+}
 const settingsKey = "sandboxed.ai";
 
 // The choice of the player, remembered in this browser.
