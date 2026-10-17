@@ -31,7 +31,7 @@ export async function status(settings) {
 
   if (settings.servertype === "cloud") {
 
-    const endpoint = "https://benchmarkserver.onrender.com/api/chat";
+    endpoint = "https://benchmarkserver.onrender.com/api/chat";
 
     const data = {
       model: settings.model, 
@@ -70,7 +70,7 @@ export async function status(settings) {
   if (!Array.isArray(data.data)) {
 
     if (settings.servertype === 'cloud') {
-      return { state: "missing", text: "no list of api config at " + endpoint};
+      return { state: "cloud", text: "no list of api config at " + msg};
     }
 
     return { state: "missing", text: "no list of models at " + endpoint + "/models. Is the address right?" };
