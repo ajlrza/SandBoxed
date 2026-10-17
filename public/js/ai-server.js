@@ -56,7 +56,7 @@ export async function status(settings) {
     try {
       response = await fetch(endpoint, payload);
       const msg = await response.json();
-      return;
+      return {state: "available", models: data.model};
     } catch (error) {
         return {
           state: "missing",
@@ -70,11 +70,6 @@ export async function status(settings) {
   const data = await response.json().catch(function () { return {}; });
   if (!Array.isArray(data.data)) {
 
-    if (settings.servertype === 'cloud') {
-      if (response.ok) {
-        return { state: "available", models: data.model};
-      }
-    }
 
     return { state: "missing", text: "no list of models at " + endpoint + "/models. Is the address right?" };
   }
