@@ -103,7 +103,6 @@ export async function ask(messages, schema, settings) {
       })
     }
 
-    response = await fetch(endpoint, req);
   }
   
   else if (settings.ai === "cloud") {
@@ -128,7 +127,18 @@ export async function ask(messages, schema, settings) {
     }
 
     response = await fetch(endpoint, req);
+
+    if (!response.ok) {
+      throw new Error("the AI server answered " + response.status + ": " + (await response.text()).slice(0, 200));
+    }
+
+    const message = (await response.json()).choices[0].message;
+
+    return JSON.parse(message.content || message.reasoning_content || message.reasoning || "");
+
   }
+
+  response = await fetch(endpoint, req);
 
   if (!response.ok) {
     throw new Error("the AI server answered " + response.status + ": " + (await response.text()).slice(0, 200));
