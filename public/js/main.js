@@ -294,7 +294,7 @@ async function makeLook(mode, text) {
   }
   const ai = lookAIs[mode];
   const data = await generate(ai, text, fixing);
-  return { name: data.name, look: ai.toLook(data) };
+  return { name: ai, look: ai.toLook(data) };
 }
 
 function fixing(message) {
