@@ -330,7 +330,7 @@ createButton.onclick = async function () {
       name = error.data.name || name;
       look = error.ai.toLook ? error.ai.toLook(error.data) : error.data;
     }
-    setScript(script(lookAIs, currentAI, behavior));
+    setScript(script(lookAIs, currentAI(), behavior));
     show(createText, "rejected: " + error.message, "bad");
   }
   createButton.disabled = false;
