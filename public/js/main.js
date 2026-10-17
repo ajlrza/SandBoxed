@@ -164,6 +164,7 @@ async function check() {
 
   if (getSettings().servertype === 'cloud') {
     ready(true);
+    return;
   }
 
   await test(number);
