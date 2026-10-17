@@ -70,7 +70,7 @@ export async function status(settings) {
   if (!Array.isArray(data.data)) {
 
     if (settings.servertype === 'cloud') {
-      return { state: "cloud", text: "no list of api config at " + msg};
+      return { state: "missing", text: "no list of api config at " + msg};
     }
 
     return { state: "missing", text: "no list of models at " + endpoint + "/models. Is the address right?" };
@@ -84,12 +84,10 @@ export async function status(settings) {
 
 export async function ask(messages, schema, settings) {
   
-  let endpoint;
   let response;
   let req;
 
   if (settings.ai === "local") {
-    endpoint = base(settings) + "/chat/completions";
 
     req = {
       method: "POST",
@@ -106,7 +104,6 @@ export async function ask(messages, schema, settings) {
   }
   
   else if (settings.ai === "cloud") {
-    endpoint = "https://benchmarkserver.onrender.com/api/chat";
 
     req = {
       method: "POST",
@@ -126,7 +123,7 @@ export async function ask(messages, schema, settings) {
       })
     }
 
-    response = await fetch(endpoint, req);
+    response = await fetch("https://benchmarkserver.onrender.com/api/chat", req);
 
     if (!response.ok) {
       throw new Error("the AI server answered " + response.status + ": " + (await response.text()).slice(0, 200));
@@ -138,7 +135,7 @@ export async function ask(messages, schema, settings) {
 
   }
 
-  response = await fetch(endpoint, req);
+  response = await fetch(base(settings) + "/chat/completions", req);
 
   if (!response.ok) {
     throw new Error("the AI server answered " + response.status + ": " + (await response.text()).slice(0, 200));
