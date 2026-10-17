@@ -56,7 +56,7 @@ export async function status(settings) {
     try {
       response = await fetch(endpoint, payload);
       const msg = await response.json();
-      return {state: "available", models: data.model};
+      return {state: "available", models: response.model};
     } catch (error) {
         return {
           state: "missing",
