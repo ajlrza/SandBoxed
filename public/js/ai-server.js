@@ -117,9 +117,10 @@ export async function ask(messages, schema, settings) {
       method: "POST",
       headers: { "Content-Type": "application/json", "Authorization": `Bearer ${settings.key}`},
       body: JSON.stringify({
-        "model": settings.model,
-        "messages": messages,
-        "stream": false
+        model: settings.model,
+        messages: messages,
+        response_format: { type: "json_schema", json_schema: { name: "answer", schema: schema } },
+        stream: false
       })
     }
 
