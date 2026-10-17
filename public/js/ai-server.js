@@ -123,14 +123,6 @@ export async function ask(messages, schema, settings) {
       body: JSON.stringify({
         "model": settings.model,
         "messages": messages,
-        "response_format": {
-          "type": "json_schema",
-          "json_schema": {
-            "name": "answer",
-            "strict": true, 
-            "schema": schema
-          }
-        },
         "stream": false
       })
     }
