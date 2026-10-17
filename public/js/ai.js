@@ -81,6 +81,20 @@ export function askAI(messages, schema) {
 
 // Ask a tiny question to be sure the AI really answers, in JSON like every other answer.
 export async function testAI() {
+  if (getSettings().servertype === 'cloud') {
+    const answer = await askAI(
+      [{ role: "system", content: "You are a helpful assistant. You must respond strictly in valid JSON matching this schema: " + JSON.stringify(
+          { type: "object", properties: { answer: { type: "string" } }, required: ["answer"],additionalProperties: false}
+        ) 
+      },
+      { 
+        role: "user", 
+        content: "Reply with the single word: OK" 
+      }
+    ],
+      schema=""
+    );
+  }
   const answer = await askAI(
     [{ role: "user", content: "Reply with the single word: OK" }],
     { type: "object", properties: { answer: { type: "string" } }, required: ["answer"] }
