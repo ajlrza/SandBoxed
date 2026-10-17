@@ -103,6 +103,16 @@ export async function ask(messages, schema, settings) {
       })
     }
 
+    response = await fetch(base(settings) + "/chat/completions", req);
+
+    if (!response.ok) {
+      throw new Error("the AI server answered " + response.status + ": " + (await response.text()).slice(0, 200));
+    }
+
+    const message = (await response.json()).choices[0].message;
+
+    return JSON.parse(message.content || message.reasoning_content || message.reasoning || "");
+
   }
   
   else if (settings.ai === "cloud") {
@@ -137,15 +147,5 @@ export async function ask(messages, schema, settings) {
 
   }
 
-  response = await fetch(base(settings) + "/chat/completions", req);
-
-  if (!response.ok) {
-    throw new Error("the AI server answered " + response.status + ": " + (await response.text()).slice(0, 200));
-  }
-
-  const message = (await response.json()).choices[0].message;
-  // Thinking models can put the whole answer into the thinking part and leave content empty:
-  // LM Studio calls it reasoning_content, Ollama calls it reasoning.
-  return JSON.parse(message.content || message.reasoning_content || message.reasoning || "");
 }
 
