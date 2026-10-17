@@ -162,6 +162,10 @@ async function check() {
   show(modelText, "ready", "ok");
   removeBox.hidden = !status.removable;
 
+  if (getSettings().servertype === 'cloud') {
+    ready(true);
+  }
+
   await test(number);
 }
 
