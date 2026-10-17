@@ -70,7 +70,9 @@ export async function status(settings) {
   if (!Array.isArray(data.data)) {
 
     if (settings.servertype === 'cloud') {
-      return { state: "missing", text: "no list of api config at " + msg};
+      if (response.ok) {
+        return { state: "available", models: data.model};
+      }
     }
 
     return { state: "missing", text: "no list of models at " + endpoint + "/models. Is the address right?" };
