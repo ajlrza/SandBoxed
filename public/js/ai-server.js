@@ -31,8 +31,6 @@ export async function status(settings) {
 
   if (settings.servertype === "cloud") {
 
-    endpoint = ;
-
     const data = {
       model: settings.model, 
       messages: [
