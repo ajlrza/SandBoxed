@@ -92,7 +92,7 @@ export async function testAI() {
         content: "Reply with the single word: OK" 
       }
     ],
-      schema=""
+      { type: "object", properties: { answer: { type: "string" } }, required: ["answer"] }
     );
   }
   const answer = await askAI(
