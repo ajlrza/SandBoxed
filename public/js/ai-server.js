@@ -15,7 +15,6 @@ function base(settings) {
 // The server is there when it lists its models.
 export async function status(settings) {
   let response;
-  let endpoint;
 
   if (settings.servertype === "local") {
     endpoint = base(settings) + "/models";
@@ -52,13 +51,13 @@ export async function status(settings) {
       signal: AbortSignal.timeout(30000) 
     }
     try {
-      response = await fetch(endpoint, payload);
+      response = await fetch(settings.url, payload);
       const msg = await response.json();
       return {state: "available", models: response.model};
     } catch (error) {
         return {
           state: "missing",
-          text: "can not reach" + endpoint + ". Error: " + error.message
+          text: "can not reach" + settings.url + ". Error: " + error.message
         }
     }
   }
@@ -69,7 +68,7 @@ export async function status(settings) {
   if (!Array.isArray(data.data)) {
 
 
-    return { state: "missing", text: "no list of models at " + endpoint + "/models. Is the address right?" };
+    return { state: "missing", text: "no list of models at " + settings.url + "/models. Is the address right?" };
   }
   // Embedding models can not chat, so they are left out.
   const models = data.data.map(function (model) { return String(model.id); })
@@ -122,7 +121,7 @@ export async function ask(messages, schema, settings) {
       })
     }
 
-    response = await fetch("", req);
+    response = await fetch(settings.url, req);
 
     if (!response.ok) {
       throw new Error("the AI server answered " + response.status + ": " + (await response.text()).slice(0, 200));
