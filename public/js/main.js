@@ -294,7 +294,7 @@ async function makeLook(mode, text) {
   }
   const ai = lookAIs[mode];
   const data = await generate(ai, text, fixing);
-  return { name: ai, look: ai.toLook(data) };
+  return { name: data.name, look: ai.toLook(data) };
 }
 
 function fixing(message) {
@@ -330,7 +330,7 @@ createButton.onclick = async function () {
       name = error.data.name || name;
       look = error.ai.toLook ? error.ai.toLook(error.data) : error.data;
     }
-    setScript(script(name, look, behavior));
+    setScript(script(getSettings(), lookMode.value, behavior));
     show(createText, "rejected: " + error.message, "bad");
   }
   createButton.disabled = false;
