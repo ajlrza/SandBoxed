@@ -102,6 +102,8 @@ export async function ask(messages, schema, settings) {
         stream: false
       })
     }
+
+    response = await fetch(endpoint, req);
   }
   
   else if (settings.ai === "cloud") {
@@ -124,10 +126,9 @@ export async function ask(messages, schema, settings) {
         "stream": false
       })
     }
+
+    response = await fetch(endpoint, req);
   }
-
-
-  response = await fetch(endpoint, req);
 
   if (!response.ok) {
     throw new Error("the AI server answered " + response.status + ": " + (await response.text()).slice(0, 200));
